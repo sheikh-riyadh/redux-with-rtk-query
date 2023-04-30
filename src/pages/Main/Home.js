@@ -1,37 +1,37 @@
-import React, { useEffect } from "react";
 import ProductCard from "../../components/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
 import { toggle, toggleBrands } from "../../features/filter/filterSlice";
-import { getProducts } from "../../features/products/productSlice";
+import { useGetProductsQuery } from "../../features/api/apiSlice";
 
 const Home = () => {
   const dispatch = useDispatch()
   const { brands, stock, } = useSelector(state => state.filter)
-  const state = useSelector(state => state)
-  const { products } = state.products
 
-  useEffect(() => {
-    dispatch(getProducts())
-  }, [dispatch]);
+  const { data: products, isLoading } = useGetProductsQuery(null, { refetchOnMountOrArgChange: true })
 
+  if (isLoading) {
+    return <div className="flex justify-center">
+      <p className="text-xl font-bold">Loading...</p>
+    </div>
+  }
 
   const activeClass = "text-white  bg-indigo-500 border-white";
 
   let content;
 
-  if (products.length) {
+  if (products?.length) {
     content = products.map((product) => (
       <ProductCard key={product.model} product={product} />
     ))
   }
-  if (products.length && (stock || brands.length)) {
+  if (products?.length && (stock || brands?.length)) {
     content = products.filter(product => {
       if (stock) {
         return product.status === true
       }
       return product;
     }).filter(product => {
-      if (brands.length) {
+      if (brands?.length) {
         return brands.includes(product.brand)
       }
       return product;

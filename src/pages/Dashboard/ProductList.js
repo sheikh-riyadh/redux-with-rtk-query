@@ -1,24 +1,18 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { removeProduct, getProducts, toggleDeleteSuccess } from "../../features/products/productSlice";
 import { toast } from "react-hot-toast";
+import { useGetProductsQuery, useRemoveProductMutation } from "../../features/api/apiSlice";
 
 const ProductList = () => {
-    const { products, isLoading, deleteSuccess, isErorr } = useSelector(state => state.products)
-    const dispatch = useDispatch()
+
+
+    const { data: products, isLoading, isError } = useGetProductsQuery()
+    const [removeProduct] = useRemoveProductMutation()
 
     useEffect(() => {
-        dispatch(getProducts())
-    }, [dispatch])
-
-    useEffect(() => {
-        if (!isLoading && deleteSuccess) {
-            toast.success("Successfully deleted", { id: "deleteProduct" })
-            dispatch(toggleDeleteSuccess())
-        } else if (!isLoading && isErorr) {
+        if (isError) {
             toast.error("Opps something went wrong")
         }
-    }, [isLoading, isErorr, deleteSuccess, dispatch])
+    }, [isError])
 
 
     if (isLoading) {
@@ -55,7 +49,7 @@ const ProductList = () => {
                         </thead>
 
                         <tbody className='text-sm divide-y divide-gray-100'>
-                            {products.map(({ model, brand, price, status, _id }) => (
+                            {products?.map(({ model, brand, price, status, _id }) => (
                                 <tr key={_id}>
                                     <td className='p-2'>
                                         <input type='checkbox' className='w-5 h-5' value='id-1' />
@@ -82,7 +76,7 @@ const ProductList = () => {
                                     </td>
                                     <td className='p-2'>
                                         <div className='flex justify-center'>
-                                            <button onClick={() => dispatch(removeProduct(_id))}>
+                                            <button onClick={() => removeProduct(_id)}>
                                                 <svg
                                                     className='w-8 h-8 hover:text-blue-600 rounded-full hover:bg-gray-100 p-1'
                                                     fill='none'
